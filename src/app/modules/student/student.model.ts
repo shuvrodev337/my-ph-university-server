@@ -85,7 +85,7 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
       },
       required: [true, 'Gender is required'],
     },
-    dateOfBirth: { type: Date },
+    dateOfBirth: { type: String },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -124,19 +124,6 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
       type: Boolean,
       default: false,
     },
-    // admissionSemester: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'AcademicSemester',
-    // },
-
-    // academicDepartment: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'AcademicDepartment',
-    // },
-    // academicFaculty: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'AcademicFaculty',
-    // },
   },
   {
     toJSON: { virtuals: true },
@@ -145,45 +132,45 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
 // Kept the trim, unique, and default properties where applicable since they are still useful for schema integrity.
 export default studentSchema;
 
-//virtuals
-studentSchema.virtual('fullNAme').get(function () {
-  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
-});
+// //virtuals
+// studentSchema.virtual('fullNAme').get(function () {
+//   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+// });
 
-//mongodb middlewares
-studentSchema.pre('save', async function (next) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  console.log(doc);
-  next();
-});
+// //mongodb middlewares
+// studentSchema.pre('save', async function (next) {
+//   // eslint-disable-next-line @typescript-eslint/no-this-alias
+//   const user = this;
+//   user.password = await bcrypt.hash(
+//     user.password,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+//   next();
+// });
+// studentSchema.post('save', function (doc, next) {
+//   doc.password = '';
+//   console.log(doc);
+//   next();
+// });
 
-// Query middlewares
-studentSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
-  next();
-});
+// // Query middlewares
+// studentSchema.pre('find', function (next) {
+//   this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
+//   next();
+// });
 
-studentSchema.pre('findOne', function (next) {
-  this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
-  next();
-});
+// studentSchema.pre('findOne', function (next) {
+//   this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
+//   next();
+// });
 
-studentSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift(
-    { $match: { isDeleted: { $ne: true } } }, // Filter deleted students
-    { $unset: 'password' }, // Remove password field from results
-  );
-  next();
-});
+// studentSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift(
+//     { $match: { isDeleted: { $ne: true } } }, // Filter deleted students
+//     { $unset: 'password' }, // Remove password field from results
+//   );
+//   next();
+// });
 
 // creeating custom static method
 studentSchema.statics.doesUserExist = async function (id: string) {

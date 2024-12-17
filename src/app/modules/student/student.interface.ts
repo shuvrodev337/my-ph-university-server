@@ -27,7 +27,7 @@ export type TStudent = {
   user: Types.ObjectId;
   name: TUserName;
   gender: 'male' | 'female' | 'other';
-  dateOfBirth?: Date;
+  dateOfBirth?: string;
   email: string;
   contactNo: string;
   emergencyContactNo: string;
@@ -40,7 +40,7 @@ export type TStudent = {
   // admissionSemester: Types.ObjectId;
   // academicDepartment: Types.ObjectId;
   // academicFaculty: Types.ObjectId;
-  isDeleted: boolean;
+  isDeleted?: boolean;
 };
 
 // custom static method
