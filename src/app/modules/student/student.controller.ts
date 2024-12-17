@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { StudentServices } from './student.services';
+import sendResponse from '../../utils/sendResponse';
+import { StatusCodes } from 'http-status-codes';
 
 const getAllStudents = async (
   req: Request,
@@ -8,9 +10,10 @@ const getAllStudents = async (
 ) => {
   try {
     const result = await StudentServices.getAllStudentsFromDB();
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
       message: 'Students retrieved successfully',
+      sttatusCode: StatusCodes.OK,
       data: result,
     });
   } catch (error) {
@@ -25,9 +28,10 @@ const getSingleStudent = async (
   try {
     const { studentID } = req.params;
     const result = await StudentServices.getSingleStudentFromDB(studentID);
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
       message: 'Student retrieved successfully',
+      sttatusCode: StatusCodes.OK,
       data: result,
     });
   } catch (error) {
@@ -47,9 +51,10 @@ const updateSingleStudent = async (
       studentID,
       updatedStudent,
     );
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
-      message: 'Student updated successfully',
+      message: 'Students updated successfully',
+      sttatusCode: StatusCodes.OK,
       data: result,
     });
   } catch (error) {
@@ -65,9 +70,10 @@ const deleteSingleStudent = async (
   try {
     const { studentID } = req.params;
     const result = await StudentServices.deleteSingleStudentFromDB(studentID);
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
-      message: 'Student deleted successfully',
+      message: 'Students deleted successfully',
+      sttatusCode: StatusCodes.OK,
       data: result,
     });
   } catch (error) {
