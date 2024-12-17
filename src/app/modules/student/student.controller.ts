@@ -1,7 +1,11 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StudentServices } from './student.services';
 
-const getAllStudents = async (req: Request, res: Response) => {
+const getAllStudents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await StudentServices.getAllStudentsFromDB();
     res.status(200).json({
@@ -9,15 +13,15 @@ const getAllStudents = async (req: Request, res: Response) => {
       message: 'Students retrieved successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'An unexpected error occurred',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
-const getSingleStudent = async (req: Request, res: Response) => {
+const getSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { studentID } = req.params;
     const result = await StudentServices.getSingleStudentFromDB(studentID);
@@ -26,15 +30,15 @@ const getSingleStudent = async (req: Request, res: Response) => {
       message: 'Student retrieved successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'An unexpected error occurred',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
-const updateSingleStudent = async (req: Request, res: Response) => {
+const updateSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { studentID } = req.params;
     const { updatedStudent } = req.body;
@@ -48,16 +52,16 @@ const updateSingleStudent = async (req: Request, res: Response) => {
       message: 'Student updated successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'An unexpected error occurred',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const deleteSingleStudent = async (req: Request, res: Response) => {
+const deleteSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { studentID } = req.params;
     const result = await StudentServices.deleteSingleStudentFromDB(studentID);
@@ -66,12 +70,8 @@ const deleteSingleStudent = async (req: Request, res: Response) => {
       message: 'Student deleted successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'An unexpected error occurred',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 export const StudentControllers = {

@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 
-import bcrypt from 'bcrypt';
 import {
   StudentModelForMethods,
   TGuardian,
@@ -8,7 +7,7 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
-import config from '../../config';
+
 const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
@@ -135,22 +134,6 @@ export default studentSchema;
 // //virtuals
 // studentSchema.virtual('fullNAme').get(function () {
 //   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
-// });
-
-// //mongodb middlewares
-// studentSchema.pre('save', async function (next) {
-//   // eslint-disable-next-line @typescript-eslint/no-this-alias
-//   const user = this;
-//   user.password = await bcrypt.hash(
-//     user.password,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-//   next();
-// });
-// studentSchema.post('save', function (doc, next) {
-//   doc.password = '';
-//   console.log(doc);
-//   next();
 // });
 
 // // Query middlewares
