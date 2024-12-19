@@ -10,11 +10,15 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  const message = 'Something went wrong!';
-  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    successs: false,
+  // Check if the error has a custom message
+  const message = err.message || 'Something went wrong!';
+  const statusCode = err.status || StatusCodes.INTERNAL_SERVER_ERROR;
+
+  return res.status(statusCode).json({
+    success: false,
     message,
-    error: err,
+    error: err, // Optionally include full error details for debugging
   });
 };
+
 export default globalErrorHandler;
