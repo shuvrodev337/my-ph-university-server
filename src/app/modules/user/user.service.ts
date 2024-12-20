@@ -1,15 +1,27 @@
 import config from '../../config';
+import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
+import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
 import { TNewUser } from './user.interface';
 import { User } from './user.model';
+import { generateStudentId } from './user.utils';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // create user
   const userData: TNewUser = {};
   userData.password = password || config.default_pass;
   userData.role = 'student';
-  userData.id = '203021234'; //This is set  temporarily , later will be embedded
+
+  // finding the admission semester, by the semester object id came from user.
+  const admissionSemester = await AcademicSemester.findById(
+    studentData.admissionSemester,
+  );
+  if (!admissionSemester) {
+    throw new Error('No semester found!');
+  }
+  // generate formatted id for user
+  userData.id = generateStudentId(admissionSemester);
   const newUser = await User.create(userData);
 
   // create student
