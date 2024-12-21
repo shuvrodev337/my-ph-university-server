@@ -1,5 +1,4 @@
 import config from '../../config';
-import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
@@ -21,13 +20,13 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     throw new Error('No semester found!');
   }
   // generate formatted id for user
-  userData.id = generateStudentId(admissionSemester);
+  userData.id = await generateStudentId(admissionSemester);
   const newUser = await User.create(userData);
 
   // create student
   if (Object.keys(newUser).length) {
-    studentData.id = newUser.id; // this id is the embedded id from user document(userData.id = '203021234';)
-    studentData.user = newUser._id; // the objecid from user document
+    studentData.id = newUser.id; // this id is the embedded id from newUser
+    studentData.user = newUser._id; // the objecid from newUser
     const newStudent = await StudentModel.create(studentData);
     return newStudent;
   }
