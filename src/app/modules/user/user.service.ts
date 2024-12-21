@@ -1,4 +1,6 @@
+import { StatusCodes } from 'http-status-codes';
 import config from '../../config';
+import AppError from '../../errors/AppError';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
@@ -17,7 +19,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     studentData.admissionSemester,
   );
   if (!admissionSemester) {
-    throw new Error('No semester found!');
+    throw new AppError(StatusCodes.NOT_FOUND, 'Invalid semester code!');
   }
   // generate formatted id for user
   userData.id = await generateStudentId(admissionSemester);
