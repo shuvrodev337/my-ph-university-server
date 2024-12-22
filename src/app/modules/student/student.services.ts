@@ -1,5 +1,9 @@
+import mongoose from 'mongoose';
 import { TStudent } from './student.interface';
 import { StudentModel } from './student.model';
+import AppError from '../../errors/AppError';
+import { StatusCodes } from 'http-status-codes';
+import { User } from '../user/user.model';
 
 const getAllStudentsFromDB = async () => {
   const result = await StudentModel.find()
@@ -33,11 +37,38 @@ const updateSingleStudentFromDB = async (
   return result;
 };
 const deleteSingleStudentFromDB = async (studentID: string) => {
-  const result = await StudentModel.updateOne(
-    { id: studentID },
-    { isDeleted: true },
-  );
-  return result;
+  if (!(await StudentModel.doesUserExist(studentID))) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find student!');
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const updatedStudent = await StudentModel.findOneAndUpdate(
+      { id: studentID },
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!updatedStudent) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete student!');
+    }
+    const updatedUser = await User.findOneAndUpdate(
+      { id: studentID },
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!updatedUser) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete user!');
+    }
+
+    session.commitTransaction();
+    session.endSession();
+    return updatedStudent;
+  } catch (error) {
+    session.abortTransaction();
+    session.endSession();
+  }
 };
 
 export const StudentServices = {
