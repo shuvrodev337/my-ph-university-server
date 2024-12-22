@@ -25,11 +25,11 @@ const getSingleStudent = catchAsync(async (req, res) => {
 });
 const updateSingleStudent = catchAsync(async (req, res) => {
   const { studentID } = req.params;
-  const { updatedStudent } = req.body;
-  //  const validatedData = updateStudentSchema.parse(updatedStudent);
+  const { student: updateData } = req.body;
+  //  const validatedData = updateStudentSchema.parse(updateData);
   const result = await StudentServices.updateSingleStudentFromDB(
     studentID,
-    updatedStudent,
+    updateData,
   );
   sendResponse(res, {
     success: true,

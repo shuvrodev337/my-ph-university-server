@@ -45,6 +45,10 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   } catch (error) {
     await session.abortTransaction(); // Transaction & Rollback- step 6- abort transaction if error occurs
     await session.endSession(); // Transaction & Rollback- step 7- end session if error occurs
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create student!',
+    );
   }
 };
 export const UserServices = {
