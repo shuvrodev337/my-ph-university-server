@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import { ZodError, ZodIssue } from 'zod';
 import { TErrorsource } from '../interface/error';
 import { handleZodError } from '../errors/handleZodError';
+import config from '../config';
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // setting default statusCode, message, errorSource.
@@ -22,9 +23,9 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     // zod provides a subclass of Error called ZodError
     const simplifiedError = handleZodError(err);
     //overwriting default error responses
-    statusCode = simplifiedError.statusCode;
-    message = simplifiedError.message;
-    errorSource = simplifiedError.errorSource;
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSource = simplifiedError?.errorSource;
   }
 
   // ultimate errorr return
@@ -32,6 +33,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     success: false,
     message,
     errorSource,
+    stact: config.NODE_ENV === 'developement' ? err.stack : null,
     //  error: err, // Optionally include full error details for debugging
   });
 };
