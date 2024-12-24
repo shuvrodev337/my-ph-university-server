@@ -5,16 +5,53 @@ import AppError from '../../errors/AppError';
 import { StatusCodes } from 'http-status-codes';
 import { User } from '../user/user.model';
 
-const getAllStudentsFromDB = async () => {
-  const result = await StudentModel.find()
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  const queryObj = { ...query };
+  const excludeFieldas = ['searchTerm', 'sort', 'limit'];
+  // excluding search, sort and limit query from queryObj(a copy of base query, to not mutate base query)
+  excludeFieldas.forEach((element) => delete queryObj[element]);
+
+  // searching
+  /* 
+  ** Partial match for searchTerm
+  **Traget of $or query operator for searchTerm query, htis will return the document matches the query fields.
+  find({ $or:  [
+   'email': { $regex: searchTerm, $options: 'i' } 
+   'name.midddleName': { $regex: searchTerm, $options: 'i' } 
+   'presenrAddress': { $regex: searchTerm, $options: 'i' } 
+          ]
+  })
+  */
+  const searchTerm = query?.searchTerm ? query?.searchTerm : '';
+  const studentSearchableFields = ['email', 'name.firstName', 'presenrAddress'];
+  const searchQuery = StudentModel.find({
+    $or: studentSearchableFields.map((field) => {
+      return { [field]: { $regex: searchTerm, $options: 'i' } };
+    }),
+  });
+
+  // filtering
+  const filterQuery = searchQuery // Method chaining
+    .find(queryObj); // exact match only for filterquery
+
+  // sorting
+  const sort = query?.sort ? (query?.sort as string) : '-createdAt'; //  field : -1 or -field are same
+  const sortQuery = filterQuery.sort(sort);
+
+  // limiting
+  const limit = query?.limit ? (query?.limit as number) : 0;
+  const limitQuery = await sortQuery
+    .limit(limit)
     .populate({
+      // populate is giving back the academicDepartment and admissionSemester full information instead of only refferenced objecId
       path: 'academicDepartment',
-      populate: { path: 'academicFaculty' }, // multiple layered populating
+      populate: { path: 'academicFaculty' }, // nested populating
     })
     .populate('admissionSemester'); // double field populating with chaining
-  return result;
-  // populate is giving back the academicDepartment and admissionSemester full information instead of only refferenced objecId
+
+  return limitQuery;
 };
+
 const getSingleStudentFromDB = async (studentID: string) => {
   const result = await StudentModel.findOne({ id: studentID }) // not using findById of mongoose, cz it is not _id of mongodb.
     .populate({
