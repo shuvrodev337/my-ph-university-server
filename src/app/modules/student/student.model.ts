@@ -141,7 +141,7 @@ export default studentSchema;
 
 // //virtuals
 // studentSchema.virtual('fullNAme').get(function () {
-//   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+//   return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 // });
 
 // // Query middlewares
