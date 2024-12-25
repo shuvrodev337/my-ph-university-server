@@ -137,7 +137,7 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
   },
 );
 // Kept the trim, unique, and default properties where applicable since they are still useful for schema integrity.
-export default studentSchema;
+// export default studentSchema;
 
 // //virtuals
 // studentSchema.virtual('fullNAme').get(function () {

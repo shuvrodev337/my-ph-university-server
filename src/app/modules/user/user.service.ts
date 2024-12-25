@@ -8,6 +8,7 @@ import { TNewUser } from './user.interface';
 import { User } from './user.model';
 import { generateStudentId } from './user.utils';
 import mongoose from 'mongoose';
+import { TFaculty } from '../faculty/faculty.interface';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const session = await mongoose.startSession(); //Transaction & Rollback- step 1- creating session
@@ -51,6 +52,51 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     );
   }
 };
+
+/*
+const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction(); 
+    const userData: TNewUser = {};
+    userData.password = password || config.default_pass;
+    userData.role = 'faculty';
+
+    // finding the admission semester, by the semester object id came from user.
+    const admissionSemester = await AcademicSemester.findById(
+      studentData.admissionSemester,
+    );
+    if (!admissionSemester) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Invalid semester code!');
+    }
+    // generate formatted id for user
+    userData.id = await generateStudentId(admissionSemester);
+
+    // create user
+    const newUser = await User.create([userData], { session }); // Transaction & Rollback- step 3- use session //returns array
+    if (!newUser.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
+    }
+    studentData.id = newUser[0].id;
+    studentData.user = newUser[0]._id;
+    // create student
+    const newStudent = await StudentModel.create([studentData], { session }); // Transaction & Rollback- step 3- use session //returns array
+    if (!newStudent.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
+    }
+    await session.commitTransaction(); // Transaction & Rollback- step 4- commit transaction(permanently writes data into DB)
+    await session.endSession(); // Transaction & Rollback- step 5- end session
+    return newStudent;
+  } catch (error) {
+    await session.abortTransaction(); // Transaction & Rollback- step 6- abort transaction if error occurs
+    await session.endSession(); // Transaction & Rollback- step 7- end session if error occurs
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create student!',
+    );
+  }
+};
+*/
 export const UserServices = {
   createStudentIntoDB,
 };

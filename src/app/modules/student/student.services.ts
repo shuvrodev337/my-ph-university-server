@@ -197,7 +197,7 @@ const deleteSingleStudentFromDB = async (studentID: string) => {
     session.endSession();
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to create student!',
+      'Failed to delete student!',
     );
   }
 };
