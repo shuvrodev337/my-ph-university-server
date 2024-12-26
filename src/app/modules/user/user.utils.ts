@@ -22,6 +22,46 @@ const findLastStudentId = async () => {
 
   return lastStudent?.id ? lastStudent.id : undefined;
 };
+const findLastFacultyId = async () => {
+  // findOne() inherently limits the result to the first document that matches the query.
+  // Since the .sort() operation ensures that the latest document is at the top, findOne() retrieves only that document.
+
+  const lastFaculty = await User.findOne(
+    {
+      role: 'faculty',
+    },
+    {
+      id: 1,
+      _id: 0,
+    },
+  )
+    .sort({
+      createdAt: -1,
+    })
+    .lean();
+
+  return lastFaculty?.id ? lastFaculty.id : undefined;
+};
+const findLastAdminId = async () => {
+  // findOne() inherently limits the result to the first document that matches the query.
+  // Since the .sort() operation ensures that the latest document is at the top, findOne() retrieves only that document.
+
+  const lastAdmin = await User.findOne(
+    {
+      role: 'admin',
+    },
+    {
+      id: 1,
+      _id: 0,
+    },
+  )
+    .sort({
+      createdAt: -1,
+    })
+    .lean();
+
+  return lastAdmin?.id ? lastAdmin.id : undefined;
+};
 
 export const generateStudentId = async (
   admissionSemester: TAcademicSemester,
@@ -45,6 +85,36 @@ export const generateStudentId = async (
   }
   let incrementedId = (Number(currentId) + 1).toString().padStart(4, '0');
   incrementedId = `${admissionSemester.year}${admissionSemester.code}${incrementedId}`; // example id 2030 01 0001
+
+  return incrementedId;
+};
+
+export const generateFacultyId = async () => {
+  let currentId = (0).toString();
+
+  const lastFacultyId = await findLastFacultyId();
+
+  if (lastFacultyId) {
+    currentId = lastFacultyId.substring(3);
+  }
+  const incrementedId = `F-${(Number(currentId) + 1)
+    .toString()
+    .padStart(4, '0')}`;
+  //   'F-' + (Number(currentId) + 1).toString().padStart(4, '0');
+
+  return incrementedId;
+};
+export const generateAdminId = async () => {
+  let currentId = (0).toString();
+
+  const lastAdminId = await findLastAdminId();
+
+  if (lastAdminId) {
+    currentId = lastAdminId.substring(3);
+  }
+  const incrementedId = `A-${(Number(currentId) + 1)
+    .toString()
+    .padStart(4, '0')}`;
 
   return incrementedId;
 };

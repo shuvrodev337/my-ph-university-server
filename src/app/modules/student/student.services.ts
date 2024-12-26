@@ -98,6 +98,10 @@ const updateSingleStudentFromDB = async (
   studentID: string,
   updateData: Partial<TStudent>,
 ) => {
+  if (!(await StudentModel.doesUserExist(studentID))) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find student!');
+  }
+
   // to update primitive and non-primitive data, without mutation issue on non primitive data.
   const { name, guardian, localGuardian, ...remainingStudentData } = updateData;
 

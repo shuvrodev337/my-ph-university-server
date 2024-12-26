@@ -27,6 +27,9 @@ const updateFacultyIntoDB = async (
   facultyId: string,
   updateData: Partial<TFaculty>,
 ) => {
+  if (!(await Faculty.isUserExists(facultyId))) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find faculty!');
+  }
   const { name, ...remainingStudentData } = updateData;
 
   const modifiedUpdatedData: Record<string, unknown> = {
@@ -81,12 +84,12 @@ const deleteFacultyFromDB = async (facultyId: string) => {
     session.endSession();
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to delete student!',
+      'Failed to delete faculty!',
     );
   }
 };
 
-export const StudentServices = {
+export const FacultyServices = {
   getAllFacultiesFromDB,
   getSingleFacultyFromDB,
   updateFacultyIntoDB,

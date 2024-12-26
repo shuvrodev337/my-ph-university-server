@@ -6,9 +6,10 @@ import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
 import { TNewUser } from './user.interface';
 import { User } from './user.model';
-import { generateStudentId } from './user.utils';
+import { generateFacultyId, generateStudentId } from './user.utils';
 import mongoose from 'mongoose';
 import { TFaculty } from '../faculty/faculty.interface';
+import { Faculty } from '../faculty/faculty.model';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const session = await mongoose.startSession(); //Transaction & Rollback- step 1- creating session
@@ -38,7 +39,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     // create student
     const newStudent = await StudentModel.create([studentData], { session }); // Transaction & Rollback- step 3- use session //returns array
     if (!newStudent.length) {
-      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create student!');
     }
     await session.commitTransaction(); // Transaction & Rollback- step 4- commit transaction(permanently writes data into DB)
     await session.endSession(); // Transaction & Rollback- step 5- end session
@@ -53,50 +54,41 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   }
 };
 
-/*
 const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
   const session = await mongoose.startSession();
   try {
-    session.startTransaction(); 
+    session.startTransaction();
     const userData: TNewUser = {};
     userData.password = password || config.default_pass;
     userData.role = 'faculty';
-
-    // finding the admission semester, by the semester object id came from user.
-    const admissionSemester = await AcademicSemester.findById(
-      studentData.admissionSemester,
-    );
-    if (!admissionSemester) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Invalid semester code!');
-    }
-    // generate formatted id for user
-    userData.id = await generateStudentId(admissionSemester);
+    userData.id = await generateFacultyId();
 
     // create user
-    const newUser = await User.create([userData], { session }); // Transaction & Rollback- step 3- use session //returns array
+    const newUser = await User.create([userData], { session });
     if (!newUser.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
     }
-    studentData.id = newUser[0].id;
-    studentData.user = newUser[0]._id;
-    // create student
-    const newStudent = await StudentModel.create([studentData], { session }); // Transaction & Rollback- step 3- use session //returns array
-    if (!newStudent.length) {
-      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
+    facultyData.id = newUser[0].id;
+    facultyData.user = newUser[0]._id;
+    // create faculty
+    const newFaculty = await Faculty.create([facultyData], { session });
+    if (!newFaculty.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create faculty!');
     }
-    await session.commitTransaction(); // Transaction & Rollback- step 4- commit transaction(permanently writes data into DB)
-    await session.endSession(); // Transaction & Rollback- step 5- end session
-    return newStudent;
+    await session.commitTransaction();
+    await session.endSession();
+    return newFaculty;
   } catch (error) {
-    await session.abortTransaction(); // Transaction & Rollback- step 6- abort transaction if error occurs
-    await session.endSession(); // Transaction & Rollback- step 7- end session if error occurs
+    await session.abortTransaction();
+    await session.endSession();
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to create student!',
+      'Failed to create Faculty!',
     );
   }
 };
-*/
+
 export const UserServices = {
   createStudentIntoDB,
+  createFacultyIntoDB,
 };
