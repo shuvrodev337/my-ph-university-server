@@ -4,7 +4,7 @@ import { StudentModel } from './student.model';
 import AppError from '../../errors/AppError';
 import { StatusCodes } from 'http-status-codes';
 import { User } from '../user/user.model';
-import { studentSearchableFields } from './student.constat';
+import { studentSearchableFields } from './student.constant';
 import QueryBuilder from '../../builder/QueryBuilder';
 
 // const getAllStudentsFromDBWithRawQuery = async (query: Record<string, unknown>) => {

@@ -6,10 +6,16 @@ import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
 import { TNewUser } from './user.interface';
 import { User } from './user.model';
-import { generateFacultyId, generateStudentId } from './user.utils';
+import {
+  generateAdminId,
+  generateFacultyId,
+  generateStudentId,
+} from './user.utils';
 import mongoose from 'mongoose';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
+import { TAdmin } from '../admin/admin.interface';
+import { Admin } from '../admin/admin.model';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const session = await mongoose.startSession(); //Transaction & Rollback- step 1- creating session
@@ -88,7 +94,42 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
   }
 };
 
+const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const userData: TNewUser = {};
+    userData.password = password || config.default_pass;
+    userData.role = 'admin';
+    userData.id = await generateAdminId();
+
+    // create user
+    const newUser = await User.create([userData], { session });
+    if (!newUser.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
+    }
+    adminData.id = newUser[0].id;
+    adminData.user = newUser[0]._id;
+    // create admin
+    const newAdmin = await Admin.create([adminData], { session });
+    if (!newAdmin.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create admin!');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return newAdmin;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create admin!',
+    );
+  }
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
+  createAdminIntoDB,
 };
