@@ -30,10 +30,10 @@ const updateFacultyIntoDB = async (
   if (!(await Faculty.isUserExists(facultyId))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find faculty!');
   }
-  const { name, ...remainingStudentData } = updateData;
+  const { name, ...remainingFacultyData } = updateData;
 
   const modifiedUpdatedData: Record<string, unknown> = {
-    ...remainingStudentData,
+    ...remainingFacultyData,
   };
 
   if (name && Object.keys(name).length) {
@@ -76,12 +76,12 @@ const deleteFacultyFromDB = async (facultyId: string) => {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete user!');
     }
 
-    session.commitTransaction();
-    session.endSession();
+    await session.commitTransaction();
+    await session.endSession();
     return updatedfaculty;
   } catch (error) {
-    session.abortTransaction();
-    session.endSession();
+    await session.abortTransaction();
+    await session.endSession();
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
       'Failed to delete faculty!',

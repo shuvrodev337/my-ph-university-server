@@ -25,7 +25,7 @@ const getSingleFaculty = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const updateSingleFaculty = catchAsync(async (req, res) => {
+const updateFaculty = catchAsync(async (req, res) => {
   const { facultyID } = req.params;
   const { faculty: updateData } = req.body;
   const result = await FacultyServices.updateFacultyIntoDB(
@@ -40,7 +40,7 @@ const updateSingleFaculty = catchAsync(async (req, res) => {
   });
 });
 
-const deleteSingleFaculty = catchAsync(async (req, res) => {
+const deleteFaculty = catchAsync(async (req, res) => {
   const { facultyID } = req.params;
   const result = await FacultyServices.deleteFacultyFromDB(facultyID);
   sendResponse(res, {
@@ -53,6 +53,6 @@ const deleteSingleFaculty = catchAsync(async (req, res) => {
 export const FacultyControllers = {
   getAllFaculties,
   getSingleFaculty,
-  updateSingleFaculty,
-  deleteSingleFaculty,
+  updateFaculty,
+  deleteFaculty,
 };

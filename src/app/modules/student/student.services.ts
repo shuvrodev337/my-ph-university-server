@@ -70,9 +70,11 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   // 2. express query
   const studentQuery = new QueryBuilder(
     StudentModel.find()
-      .populate('user')
-      .populate('admissionSemester')
-      .populate('academicDepartment academicFaculty'),
+      .populate({
+        path: 'academicDepartment',
+        populate: { path: 'academicFaculty' }, // nested populating
+      })
+      .populate('admissionSemester'),
     query,
   )
     .search(studentSearchableFields)
@@ -89,7 +91,7 @@ const getSingleStudentFromDB = async (studentID: string) => {
   const result = await StudentModel.findOne({ id: studentID }) // not using findById of mongoose, cz it is not _id of mongodb.
     .populate({
       path: 'academicDepartment',
-      populate: { path: 'academicFaculty' },
+      populate: { path: 'academicFaculty' }, // nested populating
     })
     .populate('admissionSemester');
   return result;
