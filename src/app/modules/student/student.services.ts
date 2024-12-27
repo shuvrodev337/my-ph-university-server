@@ -87,8 +87,8 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
-const getSingleStudentFromDB = async (studentID: string) => {
-  const result = await StudentModel.findOne({ id: studentID }) // not using findById of mongoose, cz it is not _id of mongodb.
+const getSingleStudentFromDB = async (_id: string) => {
+  const result = await StudentModel.findById(_id) //  using findById of mongoose, cz it finds by _id of mongodb.
     .populate({
       path: 'academicDepartment',
       populate: { path: 'academicFaculty' }, // nested populating
@@ -97,10 +97,10 @@ const getSingleStudentFromDB = async (studentID: string) => {
   return result;
 };
 const updateSingleStudentFromDB = async (
-  studentID: string,
+  _id: string,
   updateData: Partial<TStudent>,
 ) => {
-  if (!(await StudentModel.doesUserExist(studentID))) {
+  if (!(await StudentModel.doesUserExist(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find student!');
   }
 
@@ -159,48 +159,52 @@ incoming non primitive field or fields.
     }
   }
 
-  const result = await StudentModel.findOneAndUpdate(
-    // not using findByIdAndUpdate of mongoose, cz it is not _id of mongodb.
-    { id: studentID, isDeleted: { $ne: true } },
+  const result = await StudentModel.findByIdAndUpdate(
+    // using findByIdAndUpdate of mongoose, cz it is not _id of mongodb.
+    { _id, isDeleted: { $ne: true } },
     modifiedUpdatedData,
     { new: true, runValidators: true }, //returns new modified document // mongoose validaions run again
   );
 
   return result;
 };
-const deleteSingleStudentFromDB = async (studentID: string) => {
-  if (!(await StudentModel.doesUserExist(studentID))) {
+const deleteSingleStudentFromDB = async (_id: string) => {
+  if (!(await StudentModel.doesUserExist(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find student!');
   }
 
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    // not using findByIdAndUpdate of mongoose, cz it is not _id of mongodb.
 
-    const updatedStudent = await StudentModel.findOneAndUpdate(
-      { id: studentID },
+    //delete from student collection
+
+    const deletedStudent = await StudentModel.findByIdAndUpdate(
+      _id,
       { isDeleted: true },
       { new: true, session },
     );
-    if (!updatedStudent) {
+    if (!deletedStudent) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete student!');
     }
-    const updatedUser = await User.findOneAndUpdate(
-      { id: studentID },
+
+    //delete from user collection
+    const user_id = deletedStudent.user;
+    const deletedUser = await User.findByIdAndUpdate(
+      user_id,
       { isDeleted: true },
       { new: true, session },
     );
-    if (!updatedUser) {
+    if (!deletedUser) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete user!');
     }
 
-    session.commitTransaction();
-    session.endSession();
-    return updatedStudent;
+    await session.commitTransaction();
+    await session.endSession();
+    return deletedStudent;
   } catch (error) {
-    session.abortTransaction();
-    session.endSession();
+    await session.abortTransaction();
+    await session.endSession();
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
       'Failed to delete student!',

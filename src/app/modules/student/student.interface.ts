@@ -44,5 +44,5 @@ export type TStudent = {
 
 // custom static method
 export interface StudentModelForMethods extends Model<TStudent> {
-  doesUserExist(id: string): Promise<TStudent | null>;
+  doesUserExist(_id: string): Promise<TStudent | null>;
 }

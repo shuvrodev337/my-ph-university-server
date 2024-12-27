@@ -164,8 +164,8 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
 // });
 
 // creeating custom static method
-studentSchema.statics.doesUserExist = async function (id: string) {
-  const result = await StudentModel.findOne({ id });
+studentSchema.statics.doesUserExist = async function (_id: string) {
+  const result = await StudentModel.findById(_id);
   return result;
 };
 
