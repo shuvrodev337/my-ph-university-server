@@ -19,15 +19,12 @@ const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
-const getSingleAdminFromDB = async (adminId: string) => {
-  const result = await Admin.findOne({ id: adminId });
+const getSingleAdminFromDB = async (_id: string) => {
+  const result = await Admin.findById(_id);
   return result;
 };
-const updateAdminIntoDB = async (
-  adminId: string,
-  updateData: Partial<TAdmin>,
-) => {
-  if (!(await Admin.isUserExists(adminId))) {
+const updateAdminIntoDB = async (_id: string, updateData: Partial<TAdmin>) => {
+  if (!(await Admin.isUserExists(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find Admin!');
   }
   const { name, ...remainingAdminData } = updateData;
@@ -42,16 +39,16 @@ const updateAdminIntoDB = async (
     }
   }
 
-  const result = await Admin.findOneAndUpdate(
-    { id: adminId, isDeleted: { $ne: true } },
+  const result = await Admin.findByIdAndUpdate(
+    { _id, isDeleted: { $ne: true } },
     modifiedUpdatedData,
     { new: true, runValidators: true },
   );
 
   return result;
 };
-const deleteAdminFromDB = async (adminId: string) => {
-  if (!(await Admin.isUserExists(adminId))) {
+const deleteAdminFromDB = async (_id: string) => {
+  if (!(await Admin.isUserExists(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find Admin!');
   }
 
@@ -59,16 +56,17 @@ const deleteAdminFromDB = async (adminId: string) => {
   try {
     session.startTransaction();
 
-    const updatedAdmin = await Admin.findOneAndUpdate(
-      { id: adminId },
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      _id,
       { isDeleted: true },
       { new: true, session },
     );
     if (!updatedAdmin) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete Admin!');
     }
-    const updatedUser = await User.findOneAndUpdate(
-      { id: adminId },
+    const user_id = updatedAdmin.user;
+    const updatedUser = await User.findByIdAndUpdate(
+      user_id,
       { isDeleted: true },
       { new: true, session },
     );

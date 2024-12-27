@@ -5,12 +5,12 @@ import { FacultyControllers } from './faculty.controller';
 const router = express.Router();
 
 router.get('/', FacultyControllers.getAllFaculties);
-router.get('/:facultyID', FacultyControllers.getSingleFaculty);
+router.get('/:_id', FacultyControllers.getSingleFaculty);
 router.patch(
-  '/:facultyID',
+  '/:_id',
   validateRequest(facultyValidations.updateFacultyValidationSchema),
   FacultyControllers.updateFaculty,
 );
-router.delete('/:facultyID', FacultyControllers.deleteFaculty);
+router.delete('/:_id', FacultyControllers.deleteFaculty);
 
 export const FacultyRoutes = router;

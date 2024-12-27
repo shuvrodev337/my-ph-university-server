@@ -128,8 +128,8 @@ facultySchema.pre('aggregate', function (next) {
 });
 
 //checking if user is already exist!
-facultySchema.statics.isUserExists = async function (id: string) {
-  const existingUser = await Faculty.findOne({ id });
+facultySchema.statics.isUserExists = async function (_id: string) {
+  const existingUser = await Faculty.findById(_id);
   return existingUser;
 };
 

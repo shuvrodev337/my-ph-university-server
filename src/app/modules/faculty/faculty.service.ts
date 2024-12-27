@@ -19,15 +19,15 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
-const getSingleFacultyFromDB = async (facultyId: string) => {
-  const result = await Faculty.findOne({ id: facultyId });
+const getSingleFacultyFromDB = async (_id: string) => {
+  const result = await Faculty.findById(_id);
   return result;
 };
 const updateFacultyIntoDB = async (
-  facultyId: string,
+  _id: string,
   updateData: Partial<TFaculty>,
 ) => {
-  if (!(await Faculty.isUserExists(facultyId))) {
+  if (!(await Faculty.isUserExists(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find faculty!');
   }
   const { name, ...remainingFacultyData } = updateData;
@@ -42,16 +42,16 @@ const updateFacultyIntoDB = async (
     }
   }
 
-  const result = await Faculty.findOneAndUpdate(
-    { id: facultyId, isDeleted: { $ne: true } },
+  const result = await Faculty.findByIdAndUpdate(
+    { _id, isDeleted: { $ne: true } },
     modifiedUpdatedData,
     { new: true, runValidators: true },
   );
 
   return result;
 };
-const deleteFacultyFromDB = async (facultyId: string) => {
-  if (!(await Faculty.isUserExists(facultyId))) {
+const deleteFacultyFromDB = async (_id: string) => {
+  if (!(await Faculty.isUserExists(_id))) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Failed to find faculty!');
   }
 
@@ -59,16 +59,17 @@ const deleteFacultyFromDB = async (facultyId: string) => {
   try {
     session.startTransaction();
 
-    const updatedfaculty = await Faculty.findOneAndUpdate(
-      { id: facultyId },
+    const updatedfaculty = await Faculty.findByIdAndUpdate(
+      _id,
       { isDeleted: true },
       { new: true, session },
     );
     if (!updatedfaculty) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete faulty!');
     }
-    const updatedUser = await User.findOneAndUpdate(
-      { id: facultyId },
+    const user_id = updatedfaculty.user;
+    const updatedUser = await User.findByIdAndUpdate(
+      user_id,
       { isDeleted: true },
       { new: true, session },
     );
