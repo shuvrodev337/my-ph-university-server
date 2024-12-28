@@ -21,7 +21,9 @@ const getAllCoursesFromDb = async (query: Record<string, unknown>) => {
   return result;
 };
 const getSingleCourseFromDb = async (_id: string) => {
-  const result = await Course.findById(_id);
+  const result = await Course.findById(_id).populate(
+    'prereQuisiteCourses.course',
+  );
 
   return result;
 };
