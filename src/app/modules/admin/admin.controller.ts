@@ -16,8 +16,8 @@ const getAllAdmins = catchAsync(async (req, res) => {
   });
 });
 const getSingleAdmin = catchAsync(async (req, res) => {
-  const { adminID } = req.params;
-  const result = await AdminServices.getSingleAdminFromDB(adminID);
+  const { _id } = req.params;
+  const result = await AdminServices.getSingleAdminFromDB(_id);
   sendResponse(res, {
     success: true,
     message: 'Admin retrieved successfully',
@@ -26,9 +26,9 @@ const getSingleAdmin = catchAsync(async (req, res) => {
   });
 });
 const updateAdmin = catchAsync(async (req, res) => {
-  const { adminID } = req.params;
+  const { _id } = req.params;
   const { admin: updateData } = req.body;
-  const result = await AdminServices.updateAdminIntoDB(adminID, updateData);
+  const result = await AdminServices.updateAdminIntoDB(_id, updateData);
   sendResponse(res, {
     success: true,
     message: 'Admin updated successfully',
@@ -38,8 +38,8 @@ const updateAdmin = catchAsync(async (req, res) => {
 });
 
 const deleteAdmin = catchAsync(async (req, res) => {
-  const { adminID } = req.params;
-  const result = await AdminServices.deleteAdminFromDB(adminID);
+  const { _id } = req.params;
+  const result = await AdminServices.deleteAdminFromDB(_id);
   sendResponse(res, {
     success: true,
     message: 'Faculty deleted successfully',

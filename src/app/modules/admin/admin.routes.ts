@@ -5,12 +5,12 @@ import { adminValidations } from './admin.validation';
 const router = express.Router();
 
 router.get('/', AdminControllers.getAllAdmins);
-router.get('/:adminID', AdminControllers.getSingleAdmin);
+router.get('/:_id', AdminControllers.getSingleAdmin);
 router.patch(
-  '/:adminID',
+  '/:_id',
   validateRequest(adminValidations.updateAdminValidationSchema),
   AdminControllers.updateAdmin,
 );
-router.delete('/:adminID', AdminControllers.deleteAdmin);
+router.delete('/:_id', AdminControllers.deleteAdmin);
 
 export const AdminRoutes = router;
