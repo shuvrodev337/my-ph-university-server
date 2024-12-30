@@ -37,11 +37,11 @@ const getSingleCourse = catchAsync(async (req, res) => {
     data: result,
   });
 });
-/*
-const updatCourse = catchAsync(async (req, res) => {
 
+const updateCourse = catchAsync(async (req, res) => {
   const { _id } = req.params;
   const { course: updateData } = req.body;
+
   const result = await CourseServices.updateCourseIntoDb(_id, updateData);
   sendResponse(res, {
     success: true,
@@ -49,9 +49,8 @@ const updatCourse = catchAsync(async (req, res) => {
     sttatusCode: StatusCodes.OK,
     data: result,
   });
- 
 });
- */
+
 const deleteCourse = catchAsync(async (req, res) => {
   const { _id } = req.params;
   const result = await CourseServices.deleteCourseFromoDb(_id);
@@ -66,5 +65,6 @@ export const CourseControllers = {
   createCourse,
   getAllCourses,
   getSingleCourse,
+  updateCourse,
   deleteCourse,
 };
