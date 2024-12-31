@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { CourseSearchableFields } from './course.constant';
-import { TCourse } from './course.interface';
-import { Course } from './course.model';
+import { TCourse, TCourseFaculty } from './course.interface';
+import { Course, CourseFaculty } from './course.model';
 import AppError from '../../errors/AppError';
 import { StatusCodes } from 'http-status-codes';
 
@@ -116,10 +116,51 @@ const deleteCourseFromoDb = async (_id: string) => {
   return result;
 };
 
+const assignFacultiesWithCourseIntoDB = async (
+  course_id: string, // Course ID from the route parameter
+  facultiesData: Types.ObjectId[], // Array of faculty ObjectIds
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    course_id, // if we want same  value for _id and course field.us findByIdAndUpdate then. or,
+    // { course: course_id }, // Match document( or create new doc if not matched) by course field if we want different value for _id and course field.
+    {
+      course: course_id,
+      // $set: { course: course_id }, // Or , Explicitly set course ID
+      $addToSet: { faculties: { $each: facultiesData } }, // Add faculties to the array
+    },
+    {
+      upsert: true, // Create a document if none exists
+      new: true, // Return the updated document
+      runValidators: true,
+    },
+  );
+
+  return result;
+};
+
+const removeFacultiesFromCourseFromDB = async (
+  course_id: string,
+  faculties: Types.ObjectId[],
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    course_id, // same  value for _id and course field , that is why findByIdAndUpdate will work
+    // if  value for _id and course field are different, we would have to us findOneAndUpdate, by course field value.
+    {
+      $pull: { faculties: { $in: faculties } },
+    },
+    {
+      new: true,
+    },
+  );
+  return result;
+};
+
 export const CourseServices = {
   createCourseIntoDb,
   getAllCoursesFromDb,
   getSingleCourseFromDb,
   updateCourseIntoDb,
   deleteCourseFromoDb,
+  assignFacultiesWithCourseIntoDB,
+  removeFacultiesFromCourseFromDB,
 };

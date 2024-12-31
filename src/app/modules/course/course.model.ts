@@ -1,5 +1,9 @@
 import { model, Schema } from 'mongoose';
-import { TCourse, TPrereQuisiteCourses } from './course.interface';
+import {
+  TCourse,
+  TCourseFaculty,
+  TPrereQuisiteCourses,
+} from './course.interface';
 
 const preRequisiteCourseSchema = new Schema<TPrereQuisiteCourses>(
   {
@@ -14,7 +18,7 @@ const preRequisiteCourseSchema = new Schema<TPrereQuisiteCourses>(
     },
   },
   {
-    _id: false,
+    _id: false, //so that $addtoset can work properly. for _id, $addtoset counts same PrereQuisiteCourses as different,and adds duplicate PrereQuisiteCourses.
   },
 );
 const courseSchema = new Schema<TCourse>(
@@ -52,3 +56,22 @@ const courseSchema = new Schema<TCourse>(
 );
 
 export const Course = model<TCourse>('Course', courseSchema);
+
+const courseFacultySchema = new Schema<TCourseFaculty>({
+  course: {
+    type: Schema.Types.ObjectId,
+    ref: 'Course',
+    unique: true,
+    required: true,
+  },
+  faculties: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Faculty',
+    },
+  ],
+});
+export const CourseFaculty = model<TCourseFaculty>(
+  'CourseFaculty',
+  courseFacultySchema,
+);
