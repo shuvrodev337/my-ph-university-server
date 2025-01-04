@@ -10,12 +10,15 @@ import QueryBuilder from '../../builder/QueryBuilder';
 // const getAllStudentsFromDBWithRawQuery = async (query: Record<string, unknown>) => {
 //   const queryObj = { ...query };
 //   const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-//   // excluding searchTerm, sort, limit, page, fields queries from queryObj(a copy of base query, to not mutate base query)
+//   // excluding queries that we do not want to exact match->
+//     searchTerm, sort, limit, page, fields queries from queryObj(a copy of base query, to not mutate base query)
+//     filter is exact matching,so we are not excluding filter.
 //   excludeFields.forEach((element) => delete queryObj[element]);
 //   // searching
 //   /*
 //   ** Partial match for searchTerm
-//   **Traget of $or query operator for searchTerm query, htis will return the document matches the query fields.
+//   **Traget of $or query operator for searchTerm query, this will return the document that matches the query fields.
+//    map will return like this ->
 //   find({ $or:  [
 //    'email': { $regex: searchTerm, $options: 'i' }
 //    'name.midddleName': { $regex: searchTerm, $options: 'i' }
@@ -24,7 +27,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 //   })
 //   */
 //   const searchTerm = query?.searchTerm ? query?.searchTerm : '';
-//   const studentSearchableFields = ['email', 'name.firstName', 'presenrAddress']; /// on which fielda we want to match searchTerm
+//   const studentSearchableFields = ['email', 'name.firstName', 'presenrAddress']; /// on which fields we want to match searchTerm
 //   const searchQuery = StudentModel.find({
 //     $or: studentSearchableFields.map((field) => {
 //       return { [field]: { $regex: searchTerm, $options: 'i' } };

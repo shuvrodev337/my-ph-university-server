@@ -10,7 +10,7 @@ async function main() {
     await mongoose.connect(config.database_url as string);
 
     server = app.listen(config.port, () => {
-      console.log(`First Project Copy app listening on  ${config.port}`);
+      console.log(`My PH University server app listening on  ${config.port}`);
     });
   } catch (error) {
     console.log(error);
