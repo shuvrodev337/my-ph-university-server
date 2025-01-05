@@ -53,14 +53,12 @@ const getSingleSemesterRegistration = catchAsync(
     });
   },
 );
-/*
-
 
 const updateSemesterRegistration = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const result =
-      await SemesterRegistrationService.updateSemesterRegistrationIntoDB(
+      await SemesterRegistrationServices.updateSemesterRegistrationIntoDB(
         id,
         req.body,
       );
@@ -73,6 +71,7 @@ const updateSemesterRegistration = catchAsync(
     });
   },
 );
+/*
 
 const deleteSemesterRegistration = catchAsync(
   async (req: Request, res: Response) => {
@@ -93,6 +92,6 @@ export const SemesterRegistrationController = {
   createSemesterRegistration,
   getAllSemesterRegistrations,
   getSingleSemesterRegistration,
-  //   updateSemesterRegistration,
+  updateSemesterRegistration,
   //   deleteSemesterRegistration,
 };

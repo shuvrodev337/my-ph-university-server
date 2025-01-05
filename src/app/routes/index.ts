@@ -47,6 +47,10 @@ const modeuleRoutes = [
     path: '/semester-registrations',
     route: SemesterRegistrationRoutes,
   },
+  {
+    path: '/offered-courses',
+    route: SemesterRegistrationRoutes,
+  },
 ];
 modeuleRoutes.forEach((route) => router.use(route.path, route.route));
 
