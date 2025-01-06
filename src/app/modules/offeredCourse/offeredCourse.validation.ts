@@ -33,7 +33,7 @@ const createOfferedCourseValidationSchema = z.object({
         const start = new Date(`1970-01-01T${body.startTime}:00`);
         const end = new Date(`1970-01-01T${body.endTime}:00`);
 
-        return end > start;
+        return end > start; // if true then validated, but if false, validation error, with message
       },
       {
         message: 'Start time should be before End time !  ',

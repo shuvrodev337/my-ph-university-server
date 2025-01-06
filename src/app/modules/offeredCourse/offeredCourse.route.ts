@@ -11,13 +11,13 @@ router.post(
   validateRequest(OfferedCourseValidations.createOfferedCourseValidationSchema),
   OfferedCourseControllers.createOfferedCourse,
 );
-
+router.get('/', OfferedCourseControllers.getAllOfferedCourses);
+router.get('/:id', OfferedCourseControllers.getSingleOfferedCourse);
 router.patch(
   '/:id',
   validateRequest(OfferedCourseValidations.updateOfferedCourseValidationSchema),
   OfferedCourseControllers.updateOfferedCourse,
 );
+router.delete(OfferedCourseControllers.deleteOfferedCourseFromDB);
 
-router.delete('/:id', OfferedCourseControllers.deleteOfferedCourseFromDB);
-
-export const offeredCourseRoutes = router;
+export const OfferedCourseRoutes = router;
