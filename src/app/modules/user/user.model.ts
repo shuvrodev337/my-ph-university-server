@@ -1,8 +1,8 @@
 import { model, Schema } from 'mongoose';
-import { TUser } from './user.interface';
+import { TUser, UserModel } from './user.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     id: {
       type: String,
@@ -51,5 +51,48 @@ userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
+userSchema.statics.isUserExistsByCustomId = async function (id: string) {
+  return await User.findOne({ id });
+};
 
-export const User = model<TUser>('User', userSchema);
+userSchema.statics.isUserBlocked = async function (id: string) {
+  const user = await User.findOne({ id });
+  if (user?.status === 'blocked') {
+    return true;
+  }
+  return false;
+};
+userSchema.statics.isUserDeleted = async function (id: string) {
+  const user = await User.findOne({ id });
+
+  return user?.isDeleted;
+};
+
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+/*
+// Query middlewares
+userSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
+  next();
+});
+
+userSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } }).select('-password'); // Exclude password field
+  next();
+});
+
+userSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift(
+    { $match: { isDeleted: { $ne: true } } }, // Filter deleted students
+    { $unset: 'password' }, // Remove password field from results
+  );
+  next();
+});
+*/
+export const User = model<TUser, UserModel>('User', userSchema);
