@@ -2,11 +2,11 @@
 
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import config from '../../config';
-
+import bcrypt from 'bcrypt';
 const loginUser = async (payload: TLoginUser) => {
   const { id, password } = payload;
   const user = await User.isUserExistsByCustomId(id);
@@ -49,7 +49,52 @@ const loginUser = async (payload: TLoginUser) => {
   };
 };
 
-export const AuthServices = { loginUser };
+const changePassword = async (
+  userData: JwtPayload,
+  passwordData: {
+    oldPassword: string;
+    newPassword: string;
+  },
+) => {
+  const user = await User.isUserExistsByCustomId(userData.userId);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  if (await User.isUserBlocked(userData.userId)) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'User is blocked');
+  }
+
+  if (await User.isUserDeleted(userData.userId)) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User is deleted');
+  }
+
+  if (
+    !(await User.isPasswordMatched(passwordData?.oldPassword, user?.password))
+  ) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'Incorrect old password!');
+  }
+  const hashedNewPassword = await bcrypt.hash(
+    passwordData.newPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  await User.findOneAndUpdate(
+    {
+      id: user.id,
+      role: user.role,
+    },
+    {
+      password: hashedNewPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  );
+  return null;
+};
+
+export const AuthServices = { loginUser, changePassword };
+
 /*
 how to generate random number for JWT_ACCESS_SECRET
 open =>NODE in terminal
