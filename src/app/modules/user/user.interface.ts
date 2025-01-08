@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { USER_ROLE } from './user.constant';
 
 /* eslint-disable no-unused-vars */
 export interface TUser {
@@ -9,6 +10,7 @@ export interface TUser {
   status: 'in-progress' | 'blocked';
   isDeleted: boolean;
 }
+export type TNewUser = Partial<TUser>;
 
 export interface UserModel extends Model<TUser> {
   //instance methods
@@ -21,4 +23,4 @@ export interface UserModel extends Model<TUser> {
   isUserDeleted(id: string): Promise<boolean>;
 }
 
-export type TNewUser = Partial<TUser>;
+export type TUserRole = keyof typeof USER_ROLE;
