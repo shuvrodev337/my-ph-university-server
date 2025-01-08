@@ -22,6 +22,10 @@ export interface UserModel extends Model<TUser> {
   ): Promise<boolean>;
   isUserBlocked(id: string): Promise<boolean>;
   isUserDeleted(id: string): Promise<boolean>;
+  isPasswordChangedAfterJWTissued(
+    passwordChangedAt: Date,
+    jwtIssuedAt: number,
+  ): boolean;
 }
 
 export type TUserRole = keyof typeof USER_ROLE;

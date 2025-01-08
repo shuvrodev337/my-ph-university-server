@@ -78,6 +78,14 @@ userSchema.statics.isPasswordMatched = async function (
 ) {
   return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
+userSchema.statics.isPasswordChangedAfterJWTissued = async function (
+  passwordChangedAt,
+  jwtIssuedAt,
+) {
+  // This purpose of this method is to invalidate a token after password change.
+  const passwordChangedTime = new Date(passwordChangedAt).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedAt;
+};
 
 /*
 // Query middlewares
