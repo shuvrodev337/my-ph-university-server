@@ -56,6 +56,7 @@ const changePassword = async (
     newPassword: string;
   },
 ) => {
+  // userData is from token, it has the id and role of the user.
   const user = await User.isUserExistsByCustomId(userData.userId);
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
