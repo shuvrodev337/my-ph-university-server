@@ -25,19 +25,8 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
-const changePassword = catchAsync(async (req, res) => {
-  const user = req.user;
-  const passwordData = req.body;
-  const result = await AuthServices.changePassword(user, passwordData);
-  sendResponse(res, {
-    success: true,
-    message: 'Password updated successfully!',
-    sttatusCode: StatusCodes.OK,
-    data: result,
-  });
-});
 const refreshToken = catchAsync(async (req, res) => {
-  // browser sends the cookies automatically
+  // browser sends the cookies automatically if there is any.
   const { refreshToken } = req.cookies;
 
   const result = await AuthServices.refreshToken(refreshToken);
@@ -51,4 +40,30 @@ const refreshToken = catchAsync(async (req, res) => {
     },
   });
 });
-export const AuthControllers = { loginUser, changePassword, refreshToken };
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user;
+  const passwordData = req.body;
+  const result = await AuthServices.changePassword(user, passwordData);
+  sendResponse(res, {
+    success: true,
+    message: 'Password updated successfully!',
+    sttatusCode: StatusCodes.OK,
+    data: result,
+  });
+});
+const forgetPassword = catchAsync(async (req, res) => {
+  const userId = req.body.id;
+  const result = await AuthServices.forgetPassword(userId);
+  sendResponse(res, {
+    success: true,
+    message: 'Reset link is generated successfully!',
+    sttatusCode: StatusCodes.OK,
+    data: result,
+  });
+});
+export const AuthControllers = {
+  loginUser,
+  changePassword,
+  refreshToken,
+  forgetPassword,
+};

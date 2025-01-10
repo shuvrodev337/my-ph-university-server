@@ -4,6 +4,7 @@ import { USER_ROLE } from './user.constant';
 /* eslint-disable no-unused-vars */
 export interface TUser {
   id: string;
+  email: string;
   password: string;
   needsPasswordChange: boolean;
   role: 'admin' | 'student' | 'faculty';

@@ -54,7 +54,9 @@ const loginUser = async (payload: TLoginUser) => {
 };
 
 const refreshToken = async (refreshToken: string) => {
-  // purpose of this service => regenerate a new access token with the refresh token, when the access token validation is expired.
+  // purpose of this service => when the access token validation is expired,
+  //  regenerate a new access token with the refresh token,
+  //  send the new access token.
 
   const decoded = jwt.verify(
     refreshToken,
@@ -145,7 +147,47 @@ const changePassword = async (
   return null;
 };
 
-export const AuthServices = { loginUser, changePassword, refreshToken };
+const forgetPassword = async (userId: string) => {
+  // purpose of this service => get id from user, validate, generate token,
+  // generate a url with the token, send to the user email to reset password.
+
+  const user = await User.isUserExistsByCustomId(userId);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  if (await User.isUserBlocked(userId)) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'User is blocked');
+  }
+
+  if (await User.isUserDeleted(userId)) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User is deleted');
+  }
+
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  const resetToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '10m',
+  );
+
+  const resetUILink = `http://localhost:3000?id=${user.id}&token=${resetToken} `;
+
+  console.log(resetUILink);
+
+  return null;
+};
+
+export const AuthServices = {
+  loginUser,
+  changePassword,
+  refreshToken,
+  forgetPassword,
+};
 
 /*
 how to generate random number for JWT_ACCESS_SECRET

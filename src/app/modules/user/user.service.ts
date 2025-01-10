@@ -24,6 +24,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     const userData: TNewUser = {};
     userData.password = password || config.default_pass;
     userData.role = 'student';
+    userData.email = studentData.email;
 
     // finding the admission semester, by the semester object id came from user.
     const admissionSemester = await AcademicSemester.findById(
@@ -67,6 +68,7 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
     const userData: TNewUser = {};
     userData.password = password || config.default_pass;
     userData.role = 'faculty';
+    userData.email = facultyData.email;
     userData.id = await generateFacultyId();
 
     // create user
@@ -101,6 +103,8 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
     const userData: TNewUser = {};
     userData.password = password || config.default_pass;
     userData.role = 'admin';
+    userData.email = adminData.email;
+
     userData.id = await generateAdminId();
 
     // create user
