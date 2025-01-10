@@ -13,7 +13,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     // checking if the token is missing
     if (!token) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized 3!');
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
     }
 
     // checking if the given token is valid
@@ -25,7 +25,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
     req.user = decoded;
 
     const { userId, iat } = decoded;
-    console.log('decoded=>', decoded);
+    //  console.log('decoded =>', decoded);
     // validations
     const user = await User.isUserExistsByCustomId(userId);
     if (!user) {
@@ -49,13 +49,13 @@ const auth = (...requiredRoles: TUserRole[]) => {
         iat as number,
       )
     ) {
-      throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized 1!');
+      throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized!');
     }
 
     // Authorization
     const roleInToken = decoded?.role;
     if (requiredRoles && !requiredRoles.includes(roleInToken)) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized 2!');
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
     }
 
     next();

@@ -7,6 +7,7 @@ import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
+import { createToken } from './auth.utils';
 const loginUser = async (payload: TLoginUser) => {
   const { id, password } = payload;
   const user = await User.isUserExistsByCustomId(id);
@@ -32,18 +33,70 @@ const loginUser = async (payload: TLoginUser) => {
     // we will not sen sensitive data here, ex: password. we will send this payload, encrypted through accessToken
   };
 
-  // create token and send to client
-  const accessToken = jwt.sign(
+  const accessToken = createToken(
     jwtPayload,
-    config.jwt_access_secret as string, //  secret from from server, not going purely, going as encrypted
-    { expiresIn: '10d' },
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
   );
 
   return {
     accessToken,
+    refreshToken,
     needsPasswordChange: user?.needsPasswordChange, // when Admin creates an account for a faculty or student,
     // it will initially set default password.that is why we need to pass this property for this account when logged in.
     // then the user can know whether he needs password change or not.
+  };
+};
+
+const refreshToken = async (refreshToken: string) => {
+  // purpose of this service => regenerate a new access token with the refresh token, when the access token validation is expired.
+
+  const decoded = jwt.verify(
+    refreshToken,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload;
+
+  const { userId, iat } = decoded;
+
+  const user = await User.isUserExistsByCustomId(userId);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  if (await User.isUserBlocked(userId)) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'User is blocked');
+  }
+
+  if (await User.isUserDeleted(userId)) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'User is deleted');
+  }
+
+  if (
+    user.passwordChangedAt &&
+    User.isPasswordChangedAfterJWTissued(user.passwordChangedAt, iat as number)
+  ) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized!');
+  }
+
+  // give back a new access token
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return {
+    accessToken,
   };
 };
 
@@ -92,7 +145,7 @@ const changePassword = async (
   return null;
 };
 
-export const AuthServices = { loginUser, changePassword };
+export const AuthServices = { loginUser, changePassword, refreshToken };
 
 /*
 how to generate random number for JWT_ACCESS_SECRET
