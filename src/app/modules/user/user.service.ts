@@ -16,6 +16,7 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
+import { verifyToken } from '../auth/auth.utils';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const session = await mongoose.startSession(); //Transaction & Rollback- step 1- creating session
@@ -131,9 +132,31 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
     );
   }
 };
-
+const getMe = async (token: string) => {
+  // to prevent a student to get another studen,or a faculty to get another faculty data.
+  // we create this service to get the user his own data not other's data
+  const decoded = verifyToken(token, config.jwt_access_secret as string);
+  const { userId, role } = decoded;
+  let result = null;
+  if (role === 'student') {
+    result = await StudentModel.findOne({ id: userId })
+      .populate({
+        path: 'academicDepartment',
+        populate: { path: 'academicFaculty' }, // nested populating
+      })
+      .populate('admissionSemester');
+  }
+  if (role === 'faculty') {
+    result = await Faculty.findOne({ id: userId });
+  }
+  if (role === 'admin') {
+    result = await Admin.findOne({ id: userId });
+  }
+  return result;
+};
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  getMe,
 };

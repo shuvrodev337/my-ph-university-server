@@ -8,6 +8,7 @@ import { TLoginUser } from './auth.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
+import { sendEmail } from '../../utils/sendEmail';
 const loginUser = async (payload: TLoginUser) => {
   const { id, password } = payload;
   const user = await User.isUserExistsByCustomId(id);
@@ -147,11 +148,17 @@ const changePassword = async (
   return null;
 };
 
-const forgetPassword = async (userId: string) => {
-  // purpose of this service => get id from user, validate, generate token,
-  // generate a url with the token, send to the user email to reset password.
+/*
+ *** Flow of forget and reset password ***
+ * if user forgot password, user will hit the forget-password route with his id/userId >
+ * we validate the id, generate token, generate a url with the token, send to the user email to reset password
+ * When user click that url from his email, Client side will get that token, send it via headers.authorizaion and his id and new Password
+ * we then verify the token, run validations and set new password.
+ */
 
+const forgetPassword = async (userId: string) => {
   const user = await User.isUserExistsByCustomId(userId);
+
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
@@ -175,11 +182,72 @@ const forgetPassword = async (userId: string) => {
     '10m',
   );
 
-  const resetUILink = `http://localhost:3000?id=${user.id}&token=${resetToken} `;
+  const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken}`;
 
-  console.log(resetUILink);
+  sendEmail(user.email, resetUILink);
+};
 
-  return null;
+const resetPassword = async (
+  token: string,
+  payload: { id: string; newPassword: string },
+) => {
+  // checking if the given token is valid
+
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_secret as string, // always should be decoded by the secret that the token was signed in with.
+  ) as JwtPayload;
+
+  const { userId, role } = decoded;
+  const { id, newPassword } = payload;
+
+  // check id from payload and userId from token is  same or not
+  if (userId !== id) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'You are forbidden!');
+  }
+
+  // check valid user or not
+
+  const user = await User.isUserExistsByCustomId(id);
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  // check id from user and userId from token is  same or not (optional validation)
+
+  if (user.id !== userId) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'You are forbidden!');
+  }
+
+  // check block and delete
+
+  if (await User.isUserBlocked(userId)) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'User is blocked');
+  }
+
+  if (await User.isUserDeleted(userId)) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User is deleted');
+  }
+
+  // hash new password from payload
+
+  const hashedNewPassword = await bcrypt.hash(
+    newPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  await User.findOneAndUpdate(
+    {
+      id: userId,
+      role: role,
+    },
+    {
+      password: hashedNewPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  );
 };
 
 export const AuthServices = {
@@ -187,6 +255,7 @@ export const AuthServices = {
   changePassword,
   refreshToken,
   forgetPassword,
+  resetPassword,
 };
 
 /*

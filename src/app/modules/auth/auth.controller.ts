@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
 import config from '../../config';
+import AppError from '../../errors/AppError';
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
@@ -61,9 +62,28 @@ const forgetPassword = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const resetPassword = catchAsync(async (req, res) => {
+  // This token was sent to the user email. In frontend, we will add mechanism to get it and send back to this route.
+
+  const token = req.headers.authorization;
+  // checking if the token is missing
+
+  if (!token) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
+  }
+
+  const result = await AuthServices.resetPassword(token, req.body);
+  sendResponse(res, {
+    success: true,
+    message: 'password reset successful',
+    sttatusCode: StatusCodes.OK,
+    data: result,
+  });
+});
 export const AuthControllers = {
   loginUser,
   changePassword,
   refreshToken,
   forgetPassword,
+  resetPassword,
 };

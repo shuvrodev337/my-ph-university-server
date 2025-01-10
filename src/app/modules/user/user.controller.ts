@@ -2,6 +2,7 @@ import { UserServices } from './user.service';
 import sendResponse from '../../utils/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
+import AppError from '../../errors/AppError';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student } = req.body;
@@ -33,8 +34,24 @@ const createAdmin = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const getMe = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
+  }
+  const result = await UserServices.getMe(token);
+
+  sendResponse(res, {
+    success: true,
+    message: 'User retrieved successfully',
+    sttatusCode: StatusCodes.OK,
+    data: result,
+  });
+});
 export const UserController = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMe,
 };

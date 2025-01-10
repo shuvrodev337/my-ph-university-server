@@ -28,18 +28,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
     //  console.log('decoded =>', decoded);
     // validations
     const user = await User.isUserExistsByCustomId(userId);
-    if (!user) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-    }
-
-    if (await User.isUserBlocked(userId)) {
-      throw new AppError(StatusCodes.FORBIDDEN, 'User is blocked');
-    }
-
-    if (await User.isUserDeleted(userId)) {
-      throw new AppError(StatusCodes.FORBIDDEN, 'User is deleted');
-    }
-
     //  invalidate a token after password change.
 
     if (
@@ -50,6 +38,18 @@ const auth = (...requiredRoles: TUserRole[]) => {
       )
     ) {
       throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized!');
+    }
+
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    if (await User.isUserBlocked(userId)) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'User is blocked');
+    }
+
+    if (await User.isUserDeleted(userId)) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'User is deleted');
     }
 
     // Authorization
