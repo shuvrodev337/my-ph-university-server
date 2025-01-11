@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCodes } from 'http-status-codes';
 import config from '../../config';
 import AppError from '../../errors/AppError';
@@ -16,9 +17,13 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
-import { verifyToken } from '../auth/auth.utils';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
-const createStudentIntoDB = async (password: string, studentData: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  studentData: TStudent,
+) => {
   const session = await mongoose.startSession(); //Transaction & Rollback- step 1- creating session
   try {
     session.startTransaction(); // Transaction & Rollback- step 2- start transaction
@@ -37,13 +42,26 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     // generate formatted id for user
     userData.id = await generateStudentId(admissionSemester);
 
+    // uploading image functionality and set profileImg of Student
+    if (file) {
+      const imageName = `${userData.id}${studentData?.name?.firstName}`; // generate custom name
+      const path = file?.path; // folder path where the file is saved temporarily.
+
+      //send image to cloudinary
+      const { secure_url } = await sendImageToCloudinary(imageName, path);
+
+      studentData.profileImg = secure_url as string; // set the secure_url from cloudinaryData as profileImg of student
+    }
+
     // create user
     const newUser = await User.create([userData], { session }); // Transaction & Rollback- step 3- use session //returns array
     if (!newUser.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user!');
     }
+    //set id and user refference field of studentData
     studentData.id = newUser[0].id;
     studentData.user = newUser[0]._id;
+
     // create student
     const newStudent = await StudentModel.create([studentData], { session }); // Transaction & Rollback- step 3- use session //returns array
     if (!newStudent.length) {
@@ -132,12 +150,12 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
     );
   }
 };
-const getMe = async (token: string) => {
+const getMe = async (userId: string, role: string) => {
   // to prevent a student to get another studen,or a faculty to get another faculty data.
   // we create this service to get the user his own data not other's data
-  const decoded = verifyToken(token, config.jwt_access_secret as string);
-  const { userId, role } = decoded;
+
   let result = null;
+
   if (role === 'student') {
     result = await StudentModel.findOne({ id: userId })
       .populate({
@@ -147,16 +165,24 @@ const getMe = async (token: string) => {
       .populate('admissionSemester');
   }
   if (role === 'faculty') {
-    result = await Faculty.findOne({ id: userId });
+    result = await Faculty.findOne({ id: userId }).populate('user');
   }
   if (role === 'admin') {
-    result = await Admin.findOne({ id: userId });
+    result = await Admin.findOne({ id: userId }).populate('user');
   }
   return result;
 };
+const changeStatus = async (id: string, payload: { status: string }) => {
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+  return result;
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
   getMe,
+  changeStatus,
 };
