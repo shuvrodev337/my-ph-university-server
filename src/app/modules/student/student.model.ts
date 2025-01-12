@@ -176,6 +176,6 @@ studentSchema.statics.doesUserExist = async function (_id: string) {
 // };
 // model
 export const StudentModel = model<TStudent, StudentModelForMethods>(
-  'Student',
+  'Student', //  Model name
   studentSchema,
 );
