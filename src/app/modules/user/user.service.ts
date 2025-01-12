@@ -80,7 +80,11 @@ const createStudentIntoDB = async (
   }
 };
 
-const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
+const createFacultyIntoDB = async (
+  file: any,
+  password: string,
+  facultyData: TFaculty,
+) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -90,6 +94,17 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
     userData.email = facultyData.email;
     userData.id = await generateFacultyId();
 
+    // uploading image functionality and set profileImg of Faculty
+    if (file) {
+      const imageName = `${userData.id}${facultyData?.name?.firstName}`; // generate custom name
+      const path = file?.path; // folder path where the file is saved temporarily.
+
+      //send image to cloudinary
+      const { secure_url } = await sendImageToCloudinary(imageName, path);
+
+      facultyData.profileImg = secure_url as string; // set the secure_url from cloudinaryData as profileImg of faculty
+    }
+
     // create user
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -97,6 +112,7 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
     }
     facultyData.id = newUser[0].id;
     facultyData.user = newUser[0]._id;
+
     // create faculty
     const newFaculty = await Faculty.create([facultyData], { session });
     if (!newFaculty.length) {
@@ -115,7 +131,11 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
   }
 };
 
-const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
+const createAdminIntoDB = async (
+  file: any,
+  password: string,
+  adminData: TAdmin,
+) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -126,6 +146,18 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
 
     userData.id = await generateAdminId();
 
+    // uploading image functionality and set profileImg of Admin
+
+    if (file) {
+      const imageName = `${userData.id}${adminData?.name?.firstName}`; // generate custom name
+      const path = file?.path; // folder path where the file is saved temporarily.
+
+      //send image to cloudinary
+      const { secure_url } = await sendImageToCloudinary(imageName, path);
+
+      adminData.profileImg = secure_url as string; // set the secure_url from cloudinaryData as profileImg of Admin
+    }
+
     // create user
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -133,6 +165,7 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
     }
     adminData.id = newUser[0].id;
     adminData.user = newUser[0]._id;
+
     // create admin
     const newAdmin = await Admin.create([adminData], { session });
     if (!newAdmin.length) {
