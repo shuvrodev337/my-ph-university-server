@@ -50,5 +50,19 @@ class QueryBuilder<T> {
 
     return this;
   }
+  async countTotal() {
+    const totalQueries = this.modelQuery.getFilter(); // getFilter() Returns the current queries  (also known as conditions)
+    const total = await this.modelQuery.model.countDocuments(totalQueries); // total documents
+    const page = Number(this?.query?.page) || 1;
+    const limit = Number(this?.query?.limit) || 10;
+    const totalPage = Math.ceil(total / limit);
+
+    return {
+      page,
+      limit,
+      total,
+      totalPage,
+    };
+  }
 }
 export default QueryBuilder;
