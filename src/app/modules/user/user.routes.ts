@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post(
   '/create-student',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   upload.single('file'), // parses file from form-data, named 'file'. To accomodate file, this request will receive form-data , not JSON
   (req: Request, res: Response, next: NextFunction) => {
     // This middleware converts the plain text from form-data, named 'data',
@@ -26,7 +26,7 @@ router.post(
 );
 router.post(
   '/create-faculty',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -37,6 +37,8 @@ router.post(
 );
 router.post(
   '/create-admin',
+  auth(USER_ROLE.superAdmin),
+
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -52,7 +54,7 @@ router.get(
 );
 router.post(
   '/change-status/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(UserValidation.changeStatusValidationSchema),
   UserController.changeStatus,
 );

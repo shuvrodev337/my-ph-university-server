@@ -128,7 +128,7 @@ const updateSemesterRegistrationIntoDB = async (
   ) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
-      `You can not directly change status from ${currentSemesterStatus} to ${requestedStatus}`,
+      `You can not  change status from ${currentSemesterStatus} to ${requestedStatus}`,
     );
   }
 

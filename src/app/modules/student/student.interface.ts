@@ -39,10 +39,12 @@ export type TStudent = {
   profileImg?: string;
   admissionSemester: Types.ObjectId;
   academicDepartment: Types.ObjectId;
+  academicFaculty: Types.ObjectId;
   isDeleted?: boolean;
 };
 
 // custom static method
 export interface StudentModelForMethods extends Model<TStudent> {
+  // eslint-disable-next-line no-unused-vars
   doesUserExist(_id: string): Promise<TStudent | null>;
 }

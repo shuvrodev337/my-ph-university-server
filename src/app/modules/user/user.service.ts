@@ -18,6 +18,8 @@ import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
+import { AcademicFaculty } from '../academicFaculty/academicFaculty.model';
+import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 
 const createStudentIntoDB = async (
   file: any,
@@ -39,6 +41,17 @@ const createStudentIntoDB = async (
     if (!admissionSemester) {
       throw new AppError(StatusCodes.NOT_FOUND, 'Invalid semester code!');
     }
+    // finding the academicDepartment
+    const academicDepartment = await AcademicDepartment.findById(
+      studentData.academicDepartment,
+    );
+    if (!academicDepartment) {
+      throw new AppError(
+        StatusCodes.NOT_FOUND,
+        'Academic Department not found!',
+      );
+    }
+
     // generate formatted id for user
     userData.id = await generateStudentId(admissionSemester);
 
@@ -61,6 +74,8 @@ const createStudentIntoDB = async (
     //set id and user refference field of studentData
     studentData.id = newUser[0].id;
     studentData.user = newUser[0]._id;
+    // set academicFaculty
+    studentData.academicFaculty = academicDepartment.academicFaculty;
 
     // create student
     const newStudent = await StudentModel.create([studentData], { session }); // Transaction & Rollback- step 3- use session //returns array
@@ -93,6 +108,16 @@ const createFacultyIntoDB = async (
     userData.role = 'faculty';
     userData.email = facultyData.email;
     userData.id = await generateFacultyId();
+    // finding the academicDepartment
+    const academicDepartment = await AcademicDepartment.findById(
+      facultyData.academicDepartment,
+    );
+    if (!academicDepartment) {
+      throw new AppError(
+        StatusCodes.NOT_FOUND,
+        'Academic Department not found!',
+      );
+    }
 
     // uploading image functionality and set profileImg of Faculty
     if (file) {
@@ -112,7 +137,8 @@ const createFacultyIntoDB = async (
     }
     facultyData.id = newUser[0].id;
     facultyData.user = newUser[0]._id;
-
+    // set academicFaculty
+    facultyData.academicFaculty = academicDepartment.academicFaculty;
     // create faculty
     const newFaculty = await Faculty.create([facultyData], { session });
     if (!newFaculty.length) {

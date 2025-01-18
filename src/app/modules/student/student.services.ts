@@ -7,12 +7,13 @@ import { User } from '../user/user.model';
 import { studentSearchableFields } from './student.constant';
 import QueryBuilder from '../../builder/QueryBuilder';
 
-// const getAllStudentsFromDBWithRawQuery = async (query: Record<string, unknown>) => {
-//   const queryObj = { ...query };
+// const getAllStudentsFromDBWithRawQuery = async (
+//   query: Record<string, unknown>,
+// ) => {
+//   const queryObj = { ...query }; // a copy of base query, to not mutate base query
 //   const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-//   // excluding queries that we do not want to exact match->
-//     searchTerm, sort, limit, page, fields queries from queryObj(a copy of base query, to not mutate base query)
-//     filter is exact matching,so we are not excluding filter.
+//   // excluding queries that we do not want to exact match-> searchTerm, sort, limit, page, fields queries from queryObj.
+//   // filter is exact matching,so we are not excluding filter.
 //   excludeFields.forEach((element) => delete queryObj[element]);
 //   // searching
 //   /*
@@ -36,7 +37,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 
 //   // filtering
 //   const filterQuery = searchQuery // Method chaining
-//     .find(queryObj); // exact match only for filterquery
+//     .find(queryObj); // exact match only for filterquery // examplefilter by email:  .find({email: "exampleemail@gmail.com"})
 
 //   // sorting
 //   const sort = query?.sort ? (query?.sort as string) : '-createdAt'; //  field : -1 or -field are same

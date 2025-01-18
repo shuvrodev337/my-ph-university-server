@@ -9,6 +9,7 @@ import config from '../../config';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
 import { sendEmail } from '../../utils/sendEmail';
+
 const loginUser = async (payload: TLoginUser) => {
   const { id, password } = payload;
   const user = await User.isUserExistsByCustomId(id);

@@ -23,24 +23,21 @@ const getAllCoursesFromDb = async (query: Record<string, unknown>) => {
   const result = await courseQuery.modelQuery;
   return result;
 };
-const getSingleCourseFromDb = async (_id: string) => {
-  const result = await Course.findById(_id).populate(
+const getSingleCourseFromDb = async (id: string) => {
+  const result = await Course.findById(id).populate(
     'prereQuisiteCourses.course',
   );
 
   return result;
 };
-const updateCourseIntoDb = async (
-  _id: string,
-  courseData: Partial<TCourse>,
-) => {
+const updateCourseIntoDb = async (id: string, courseData: Partial<TCourse>) => {
   const { prereQuisiteCourses, ...basicUpdateCourseData } = courseData;
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
     const updateBasicCourseInfo = await Course.findByIdAndUpdate(
-      _id,
+      id,
       basicUpdateCourseData,
       { new: true, runValidators: true, session },
     );
@@ -55,7 +52,7 @@ const updateCourseIntoDb = async (
         .map((el) => el.course);
       // remove the courses
       const deletedPreRequisiteCourses = await Course.findByIdAndUpdate(
-        _id,
+        id,
         {
           $pull: {
             prereQuisiteCourses: {
@@ -79,7 +76,7 @@ const updateCourseIntoDb = async (
 
       // update the courses
       const updatedPrerequisiteCourses = await Course.findByIdAndUpdate(
-        _id,
+        id,
         {
           $addToSet: { prereQuisiteCourses: { $each: newPrerequisites } },
         },
@@ -96,7 +93,7 @@ const updateCourseIntoDb = async (
 
     await session.commitTransaction();
     await session.endSession();
-    const result = await Course.findById(_id).populate(
+    const result = await Course.findById(id).populate(
       'prereQuisiteCourses.course',
     );
     return result;
@@ -106,9 +103,9 @@ const updateCourseIntoDb = async (
     throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to update course');
   }
 };
-const deleteCourseFromoDb = async (_id: string) => {
+const deleteCourseFromoDb = async (id: string) => {
   const result = await Course.findByIdAndUpdate(
-    _id,
+    id,
     { isDeleted: true },
     { new: true },
   );
@@ -117,15 +114,15 @@ const deleteCourseFromoDb = async (_id: string) => {
 };
 
 const assignFacultiesWithCourseIntoDB = async (
-  course_id: string, // Course ID from the route parameter
+  courseId: string, // Course ID from the route parameter
   facultiesData: Types.ObjectId[], // Array of faculty ObjectIds
 ) => {
   const result = await CourseFaculty.findByIdAndUpdate(
-    course_id, // if we want same  value for _id and course field.us findByIdAndUpdate then. or,
-    // { course: course_id }, // Match document( or create new doc if not matched) by course field if we want different value for _id and course field.
+    courseId, // if we want same  value for _id and course field.us findByIdAndUpdate then. or,
+    // { course: courseId }, // Match document( or create new doc if not matched) by course field if we want different value for _id and course field.
     {
-      course: course_id,
-      // $set: { course: course_id }, // Or , Explicitly set course ID
+      course: courseId,
+      // $set: { course: courseId }, // Or , Explicitly set course ID
       $addToSet: { faculties: { $each: facultiesData } }, // Add faculties to the array
     },
     {
@@ -138,12 +135,22 @@ const assignFacultiesWithCourseIntoDB = async (
   return result;
 };
 
+const getFacultiesOfCourseFromDB = async (
+  courseId: string, // Course ID from the route parameter
+) => {
+  const result = await CourseFaculty.findOne({ course: courseId }).populate(
+    'faculties',
+  );
+
+  return result;
+};
+
 const removeFacultiesFromCourseFromDB = async (
-  course_id: string,
+  courseId: string,
   faculties: Types.ObjectId[],
 ) => {
   const result = await CourseFaculty.findByIdAndUpdate(
-    course_id, // same  value for _id and course field , that is why findByIdAndUpdate will work
+    courseId, // same  value for _id and course field , that is why findByIdAndUpdate will work
     // if  value for _id and course field are different, we would have to us findOneAndUpdate, by course field value.
     {
       $pull: { faculties: { $in: faculties } },
@@ -162,5 +169,6 @@ export const CourseServices = {
   updateCourseIntoDb,
   deleteCourseFromoDb,
   assignFacultiesWithCourseIntoDB,
+  getFacultiesOfCourseFromDB,
   removeFacultiesFromCourseFromDB,
 };

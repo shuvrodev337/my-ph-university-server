@@ -10,20 +10,24 @@ router.post(
   CourseControllers.createCourse,
 );
 router.get('/', CourseControllers.getAllCourses);
-router.get('/:_id', CourseControllers.getSingleCourse);
+router.get('/:id', CourseControllers.getSingleCourse);
 router.patch(
-  '/:_id',
+  '/:id',
   validateRequest(CourseValidations.updateCourseValidationSchema),
   CourseControllers.updateCourse,
 );
-router.delete('/:_id', CourseControllers.deleteCourse);
+router.delete('/:id', CourseControllers.deleteCourse);
 router.put(
-  '/:course_id/assign-faculties',
+  '/:courseId/assign-faculties',
   validateRequest(CourseValidations.facultiesWithCourseValidationSchema),
   CourseControllers.assignFacultiesWithCourse,
 );
+router.get(
+  '/:courseId/assigned-faculties',
+  CourseControllers.getFacultiesOfCourse,
+);
 router.delete(
-  '/:course_id/remove-faculties',
+  '/:courseId/remove-faculties',
   validateRequest(CourseValidations.facultiesWithCourseValidationSchema),
   CourseControllers.removeFacultiesFromCourse,
 );

@@ -2,13 +2,14 @@ import app from './app';
 import config from './app/config';
 import mongoose from 'mongoose';
 import { Server } from 'http';
+import seedSuperAdmin from './app/DB';
 
 let server: Server;
 // Connectivity function
 async function main() {
   try {
     await mongoose.connect(config.database_url as string);
-
+    seedSuperAdmin();
     server = app.listen(config.port, () => {
       console.log(`My PH University server app listening on  ${config.port}`);
     });

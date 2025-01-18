@@ -12,14 +12,14 @@ class QueryBuilder<T> {
   search(searchableFields: string[]) {
     if (this?.query?.searchTerm) {
       const searchTerm = this?.query?.searchTerm ? this?.query?.searchTerm : '';
-      // value of modelQuery of 'this' will get -reasigned
+      // value of modelQuery of 'this' will get chained with the previous value of modelQuery of 'this'
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map((field) => {
           return { [field]: { $regex: searchTerm, $options: 'i' } };
         }),
       } as FilterQuery<T>);
     }
-    return this; //  we are manipulating and then returning 'this'. fror chaining method.
+    return this; //  we are manipulating and then returning 'this'. for chaining method.
   }
   filter() {
     const queryObj = { ...this.query };
@@ -51,16 +51,18 @@ class QueryBuilder<T> {
     return this;
   }
   async countTotal() {
-    const totalQueries = this.modelQuery.getFilter(); // getFilter() Returns the current queries  (also known as conditions)
-    const total = await this.modelQuery.model.countDocuments(totalQueries); // total documents
+    const totalQueries = this.modelQuery.getFilter(); // getFilter() Returns the total queries in find method
+    const totalDocuments =
+      await this.modelQuery.model.countDocuments(totalQueries); // total documents
     const page = Number(this?.query?.page) || 1;
     const limit = Number(this?.query?.limit) || 10;
-    const totalPage = Math.ceil(total / limit);
+    const totalPage = Math.ceil(totalDocuments / limit);
+    console.log(totalQueries, page, limit, totalDocuments, totalPage);
 
     return {
       page,
       limit,
-      total,
+      totalDocuments,
       totalPage,
     };
   }
