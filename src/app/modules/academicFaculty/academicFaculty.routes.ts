@@ -23,7 +23,7 @@ router.get(
     USER_ROLE.student,
   ),
 
-  AcademicFacultyController.getAcademicFaculties,
+  AcademicFacultyController.getAllAcademicFaculties,
 );
 router.get(
   '/:academicFacultyId',

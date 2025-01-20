@@ -190,11 +190,9 @@ const getAllEnrolledCoursesFromDB = async (
   const enrolledCourseQuery = new QueryBuilder(
     EnrolledCourse.find({
       faculty: faculty._id, // faculty will get the curses assigned to him that are enrolled by students
-    })
-      //  .populate(
-      //  'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
-      //)
-      .populate('course'),
+    }).populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
     query,
   )
     .filter()

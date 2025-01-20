@@ -8,7 +8,10 @@ import mongoose from 'mongoose';
 import { User } from '../user/user.model';
 
 const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
-  const facultyQuery = new QueryBuilder(Faculty.find(), query)
+  const facultyQuery = new QueryBuilder(
+    Faculty.find().populate('academicFaculty academicDepartment'),
+    query,
+  )
     .search(FacultySearchableFields)
     .filter()
     .sort()
@@ -16,7 +19,8 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await facultyQuery.modelQuery;
-  return result;
+  const meta = await facultyQuery.countTotal();
+  return { result, meta };
 };
 
 const getSingleFacultyFromDB = async (_id: string) => {

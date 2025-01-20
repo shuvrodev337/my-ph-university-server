@@ -74,11 +74,11 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   // 2. express query
   const studentQuery = new QueryBuilder(
     StudentModel.find()
-      .populate({
-        path: 'academicDepartment',
-        populate: { path: 'academicFaculty' }, // nested populating
-      })
-      .populate('admissionSemester'),
+      // .populate({
+      //   path: 'academicDepartment',
+      //   populate: { path: 'academicFaculty' }, // nested populating
+      // })
+      .populate('admissionSemester academicDepartment academicFaculty'),
     query,
   )
     .search(studentSearchableFields)

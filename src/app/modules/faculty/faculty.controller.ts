@@ -12,7 +12,8 @@ const getAllFaculties = catchAsync(async (req, res) => {
     success: true,
     message: 'Faculties retrieved successfully',
     sttatusCode: StatusCodes.OK,
-    data: result,
+    data: result.result,
+    meta: result.meta,
   });
 });
 const getSingleFaculty = catchAsync(async (req, res) => {
