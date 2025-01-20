@@ -14,11 +14,19 @@ router.post(
   validateRequest(OfferedCourseValidations.createOfferedCourseValidationSchema),
   OfferedCourseControllers.createOfferedCourse,
 );
+
 router.get(
   '/',
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
   OfferedCourseControllers.getAllOfferedCourses,
 );
+// A student can only see the offeredCourses offered to him, under his department, not all offeredCourses
+router.get(
+  '/my-offered-courses',
+  auth(USER_ROLE.student),
+  OfferedCourseControllers.getMyOfferedCourses,
+);
+// A student can  see the details of a single offeredCourse
 router.get(
   '/:id',
   auth(

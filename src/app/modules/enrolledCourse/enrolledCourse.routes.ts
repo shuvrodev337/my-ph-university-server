@@ -9,7 +9,7 @@ router.post(
   auth(USER_ROLE.student),
   EnrolledCourseControllers.createEnrolledCourse,
 );
-/* //  TODO
+
 router.get(
   '/',
   auth(USER_ROLE.faculty),
@@ -21,7 +21,7 @@ router.get(
   auth(USER_ROLE.student),
   EnrolledCourseControllers.getMyEnrolledCourses,
 );
-*/
+
 router.patch(
   '/update-enrolled-course-marks',
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),

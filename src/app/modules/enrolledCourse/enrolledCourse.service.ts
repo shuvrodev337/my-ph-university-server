@@ -12,6 +12,7 @@ import { SemesterRegistration } from '../semesterRegistration/semesterRegistrati
 import { Course } from '../course/course.model';
 import { Faculty } from '../faculty/faculty.model';
 import { calculateGradeAndPoints } from './enrolledCourse.utils';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createEnrolledCourseIntoDb = async (
   userId: string,
@@ -176,6 +177,69 @@ const createEnrolledCourseIntoDb = async (
     throw new Error(err);
   }
 };
+const getAllEnrolledCoursesFromDB = async (
+  facultyId: string,
+  query: Record<string, unknown>,
+) => {
+  const faculty = await Faculty.findOne({ id: facultyId });
+
+  if (!faculty) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Faculty not found !');
+  }
+
+  const enrolledCourseQuery = new QueryBuilder(
+    EnrolledCourse.find({
+      faculty: faculty._id, // faculty will get the curses assigned to him that are enrolled by students
+    })
+      //  .populate(
+      //  'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+      //)
+      .populate('course'),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
+
+const getMyEnrolledCoursesFromDB = async (
+  studentId: string,
+  query: Record<string, unknown>,
+) => {
+  const student = await StudentModel.findOne({ id: studentId });
+
+  if (!student) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Student not found !');
+  }
+
+  const enrolledCourseQuery = new QueryBuilder(
+    EnrolledCourse.find({ student: student._id }).populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
 
 const updateEnrolledCourseMarksIntoDb = async (
   facultyId: string,
@@ -274,4 +338,6 @@ const updateEnrolledCourseMarksIntoDb = async (
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDb,
   updateEnrolledCourseMarksIntoDb,
+  getAllEnrolledCoursesFromDB,
+  getMyEnrolledCoursesFromDB,
 };
