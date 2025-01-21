@@ -30,8 +30,8 @@ const getAllSemesterRegistrations = catchAsync(
       sttatusCode: StatusCodes.OK,
       success: true,
       message: 'Registered Semisters are retrieved successfully !',
-
-      data: result,
+      data: result.result,
+      meta: result.meta,
     });
   },
 );

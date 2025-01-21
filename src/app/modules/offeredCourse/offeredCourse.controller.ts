@@ -25,7 +25,8 @@ const getAllOfferedCourses = catchAsync(async (req: Request, res: Response) => {
     sttatusCode: StatusCodes.OK,
     success: true,
     message: 'Offered Courses retrieved successfully !',
-    data: result,
+    data: result.result,
+    meta: result.meta,
   });
 });
 const getSingleOfferedCourse = catchAsync(

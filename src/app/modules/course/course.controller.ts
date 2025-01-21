@@ -24,7 +24,8 @@ const getAllCourses = catchAsync(async (req, res) => {
     success: true,
     message: 'Courses retrieved successfully',
     sttatusCode: StatusCodes.OK,
-    data: result,
+    data: result.result,
+    meta: result.meta,
   });
 });
 const getSingleCourse = catchAsync(async (req, res) => {
