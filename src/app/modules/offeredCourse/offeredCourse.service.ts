@@ -172,7 +172,7 @@ const getMyOfferedCoursesFromDB = async (
     throw new AppError(StatusCodes.NOT_FOUND, 'Student not found!');
   }
 
-  // check semisterRegistration
+  // check current onging semisterRegistration
   const currentOngoingSemisterRegistration = await SemesterRegistration.findOne(
     {
       status: RegistrationStatus.ONGOING,
@@ -187,7 +187,9 @@ const getMyOfferedCoursesFromDB = async (
   }
 
   const aggregationQuery = [
-    // Getting the offered courses in this semesterRegistration , academicFaculty for this student student
+    // Getting the offered courses
+    // under the academicFaculty and academicDepartment of this student
+    // in this ongoing semesterRegistration ,
     {
       $match: {
         semesterRegistration: currentOngoingSemisterRegistration._id,
@@ -209,12 +211,12 @@ const getMyOfferedCoursesFromDB = async (
       $unwind: '$course',
     },
 
-    /* ****** filter out already enrolled courses from offered courses
-     *******   show the offeredCourses
-     1. which courses have no prereQuisiteCourses(prereQuisiteCourses field is empty array )
-     2.  which  have their prereQuisiteCourse courses comleted
-
-     */
+    /* 
+    A. filter out already enrolled courses from offered courses
+    B. show the offeredCourses->
+      1. which courses have no prereQuisiteCourses(prereQuisiteCourses field is empty array )
+      2. which  have their prereQuisiteCourse courses comleted
+    */
 
     // lookup to find all the enrolled courses by this student in this ongoing semester.
     {
@@ -225,7 +227,8 @@ const getMyOfferedCoursesFromDB = async (
             currentOngoingSemisterRegistration._id,
           currentStudent: student._id,
         },
-        // ** no localField needed, bcz we are not getting one enrolledCourse. We r getting multiple enrolledCourse according to below conditions.
+        // ** no localField needed, bcz we are not getting one enrolledCourse.
+        //  We r getting multiple enrolledCourse according to below conditions.
         // 1. for this registered semester
         // 2. for this student
         // 3 . enrolled true
@@ -266,9 +269,8 @@ const getMyOfferedCoursesFromDB = async (
           currentStudent: student._id,
         },
         // ** no localField needed, bcz we are not getting one enrolledCourse. We r getting multiple enrolledCourse according to below conditions.
-        // 1. for this registered semester
-        // 2. for this student
-        // 3 . enrolled true
+        // 1. for this student
+        // 2 . isCompleted true
         //  pipeline to get those enrolled courses ->
         pipeline: [
           {
@@ -311,11 +313,13 @@ const getMyOfferedCoursesFromDB = async (
     {
       $addFields: {
         isPreRequisitesFulFilled: {
+          // $or bcz one of thes condition is needede to be true to return true
           $or: [
             // If the course has no prerequisite courses
             { $eq: ['$course.prereQuisiteCourses', []] },
             {
-              // if the course.preRequisiteCourses.course (accessed to thearray of ids of prerequisite courses) are available in the completedCourseIds array...
+              // if all the course.preRequisiteCourses.course (ids) are available in the completedCourseIds array...
+              // setIsSubset is checking all the 1st array elements are present in the 2nd array
               $setIsSubset: [
                 '$course.prereQuisiteCourses.course',
                 '$completedCourseIds',
@@ -325,6 +329,7 @@ const getMyOfferedCoursesFromDB = async (
         },
 
         // $in so that we can compare and match the course with the already enrolledCourses(stored in enrolledCourses array)
+        // The MongoDB $in operator is used to match documents where the value of a field equals any value in a specified array.
         isAlreadyEnrolled: {
           $in: [
             '$course._id',
@@ -342,11 +347,11 @@ const getMyOfferedCoursesFromDB = async (
       },
     },
 
-    // filter out already enrolled courses in this semester + check if the prerequisites are fulfilled
+    // filter out already enrolled courses in this semester + check if the prerequisites are completed
     {
       $match: {
-        isAlreadyEnrolled: false,
-        isPreRequisitesFulFilled: true,
+        isAlreadyEnrolled: false, // if the course is not already enrolled , let it through
+        isPreRequisitesFulFilled: true, //  if the prerequisites are completed or it has no prerequisite course
       },
     },
   ];

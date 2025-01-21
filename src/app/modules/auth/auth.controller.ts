@@ -9,10 +9,13 @@ const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
 
   const { refreshToken, accessToken, needsPasswordChange } = result;
+  // vercel/ netlify or any other free hosting services do not provide cookie policy, digitalocean /aws server good for paid options.
 
   res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: 'none', // frontend and backend different domain
+    maxAge: 1000 * 60 * 60 * 24 * 365, // refresh token expirity // 1 year here
   });
 
   sendResponse(res, {

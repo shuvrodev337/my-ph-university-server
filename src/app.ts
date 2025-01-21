@@ -9,7 +9,7 @@ const app: Application = express();
 // Parsers
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ['http://localhost:5173'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173'], credentials: true })); // frontend live link will be added here
 
 app.use('/api/v1', router);
 
