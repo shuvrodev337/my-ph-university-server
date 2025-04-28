@@ -125,3 +125,8 @@
 // Mongoose virtuals -> We can give an data that is not in our db, but derived from our db, by using mongoose virtuals
 // The  purpose of virtuals-> To create virtual documents that exist only in memory, not in the database.
 //findOneAndUpdate returns updated data, updateOne does not
+/*
+how to generate random number for JWT_ACCESS_SECRET
+open =>NODE in terminal
+then =>require('crypto').randomBytes(32).toString('hex')
+*/

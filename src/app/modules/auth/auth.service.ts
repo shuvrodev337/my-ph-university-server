@@ -32,7 +32,7 @@ const loginUser = async (payload: TLoginUser) => {
   const jwtPayload = {
     userId: user.id,
     role: user.role,
-    // we will not sen sensitive data here, ex: password. we will send this payload, encrypted through accessToken
+    // we will not send sensitive data here, ex: password. we will send this payload, encrypted through accessToken
   };
 
   const accessToken = createToken(
