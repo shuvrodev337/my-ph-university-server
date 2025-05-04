@@ -11,13 +11,23 @@ const loginUser = catchAsync(async (req, res) => {
   const { refreshToken, accessToken, needsPasswordChange } = result;
   // vercel/ netlify or any other free hosting services do not provide cookie policy, digitalocean /aws server good for paid options.
 
-  res.cookie('refreshToken', refreshToken, {
+  /* res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'none', // frontend and backend different domain
     maxAge: 1000 * 60 * 60 * 24 * 365, // refresh token expirity // 1 year here
-  });
+  }); 
 
+Issue: The refreshToken Cookie Is Being Set With SameSite: 'none' + secure: true (in production)
+This combination requires HTTPS — which means on localhost without HTTPS, the cookie is silently blocked by the browser.
+Solution below->
+  */
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production', // only secure in prod
+    httpOnly: true,
+    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax', // "none" only in prod
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
   sendResponse(res, {
     success: true,
     message: 'Login successfull',
@@ -32,7 +42,6 @@ const loginUser = catchAsync(async (req, res) => {
 const refreshToken = catchAsync(async (req, res) => {
   // browser sends the cookies automatically if there is any.
   const { refreshToken } = req.cookies;
-
   const result = await AuthServices.refreshToken(refreshToken);
   const { accessToken } = result;
   sendResponse(res, {

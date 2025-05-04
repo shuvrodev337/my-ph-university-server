@@ -16,11 +16,24 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
     }
 
+    let decoded;
     // checking if the given token is valid
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
+    try {
+      // jwt verify can generate errors, we want to give custom error instead of global error depending on the error type.
+      decoded = jwt.verify(
+        token,
+        config.jwt_access_secret as string,
+      ) as JwtPayload;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.name === 'TokenExpiredError') {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Token has expired');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid token');
+      }
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized');
+    }
     // add the user with req
     req.user = decoded;
 
