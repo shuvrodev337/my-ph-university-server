@@ -26,10 +26,8 @@ const createGuardianValidationSchema = z.object({
 const createLocalGuardianValidationSchema = z.object({
   name: z.string().trim().max(30),
   occupation: z.string().trim().max(30),
-  contactNo: z
-    .string()
-    .trim()
-    .regex(/^\+?\d{10,15}$/, { message: 'Invalid contact number' }),
+  contactNo: z.string().trim(),
+  // .regex(/^\+?\d{10,15}$/, { message: 'Invalid contact number' })
   address: z.string().trim().max(100),
 });
 

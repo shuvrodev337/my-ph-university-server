@@ -50,6 +50,7 @@ const createStudentIntoDB = async (
         'Academic Department not found!',
       );
     }
+    // todo : Email is not available/ email already taken error
 
     // generate formatted id for user
     userData.id = await generateStudentId(admissionSemester);
@@ -85,6 +86,7 @@ const createStudentIntoDB = async (
     await session.endSession(); // Transaction & Rollback- step 5- end session
     return newStudent;
   } catch (error) {
+    //console.log(error);
     await session.abortTransaction(); // Transaction & Rollback- step 6- abort transaction if error occurs
     await session.endSession(); // Transaction & Rollback- step 7- end session if error occurs
     throw new AppError(
