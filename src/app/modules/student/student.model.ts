@@ -143,10 +143,10 @@ const studentSchema = new Schema<TStudent, StudentModelForMethods>(
 // Kept the trim, unique, and default properties where applicable since they are still useful for schema integrity.
 // export default studentSchema;
 
-// //virtuals
-// studentSchema.virtual('fullNAme').get(function () {
-//   return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
-// });
+//virtuals
+studentSchema.virtual('fullName').get(function () {
+  return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
+});
 
 // // Query middlewares
 // studentSchema.pre('find', function (next) {
